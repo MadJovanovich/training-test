@@ -1,0 +1,159 @@
+---
+title: "ggplot_lesson"
+author: "Madeline Jovanovich"
+date: "5/18/2018"
+output: html_document
+---
+
+```{r}
+suppressPackageStartupMessages({
+  library(ggplot2)
+  library(tidyr)
+  library(dplyr)
+})
+```
+
+```{r}
+permits <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3Aa3c58bd6-481e-4c64-aa93-795df10a4664", method = "libcurl"),
+                    stringsAsFactors = FALSE)
+```
+
+```{r}
+ggplot(permits, aes(x=Value, y=StdDev, color=Gear)) +
+  geom_point() 
+```
+
+
+```{r}
+ggplot(permits, aes(x=Value)) +
+  geom_histogram(binwidth = 1e4) 
+```
+
+```{r}
+ggplot(permits, aes(x=Gear, y=Value)) +
+  geom_boxplot()
+```
+
+```{r}
+permits_ci <- permits %>%
+  filter(Region == "Cook Inlet")
+
+permits_bb <- permits %>%
+  filter(Region == "Bristol Bay")
+
+ggplot(permits_bb, aes(x=Gear, y=Value)) +
+  geom_violin()
+
+ggplot(permits_ci, aes(x=Gear, y=Value)) +
+  geom_violin() + 
+  geom_point(position = "jitter", shape = 1) 
+```
+
+
+```{r}
+ggplot(permits_ci, aes(x=Value, y=StdDev)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+```{r}
+permits_se_seine <- permits %>%
+  filter(Gear == "Purse Seine", 
+         Region == "Southeast")
+```
+```{r}
+ggplot(permits_se_seine, aes(x=Year, y=Value)) + 
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(limits = c(0, max(permits_se_seine$Value))) + 
+  scale_x_continuous(limits = c(2000, max(permits_se_seine$Year)))
+
+ggplot(permits_se_seine, aes(x=Year, y=Value)) + 
+  geom_point() +
+  geom_line() +
+  coord_cartesian(xlim = c(2000, max(permits_se_seine$Year)),
+                  ylim = c(0, max(permits_se_seine$Value)))
+```
+
+```{r}
+ggplot(permits, aes(x=Value, y=StdDev, color=Gear)) + 
+  geom_point() + 
+    scale_color_brewer(palette = "Paired") + 
+    scale_x_log10()
+```
+
+```{r}
+library(scales)
+```
+
+```{r}
+permits %>%
+  group_by(Gear) %>%
+  summarize(meanval = mean(Value, na.rm = TRUE)) %>%
+  arrange(Gear) 
+```
+%>%
+  ggplot(aes(x=Gear, y=meanval)) + 
+  geom_col() +
+  scale_y_continuous(labels = comma) 
+
+```{r}
+mean_permits <- permits %>%
+  group_by(Gear, Region) %>%
+  summarize(meanval = mean(Value, na.rm = TRUE)) %>%
+  arrange(Gear)
+
+
+ggplot(mean_permits, aes(x=Gear, y=meanval, fill=Region)) +
+  geom_bar(stat = "identity", position = "dodge") 
+
+ggsave("Permit_Values.png")
+```
+
+
+This is colors I used: `colors_I_use <- scale_color_brewer(palette = "YlGnBu")`
+
+```{r}
+my_theme <- theme(axis.title = element_text(size=16), 
+        axis.text = element_text(size=12))
+
+ggplot(permits_bb, aes(Year, Value, color=Gear)) + 
+  geom_point() + 
+  geom_line() + 
+  labs(y = "Permit Value", 
+       title = "Bristol Bay Permits", 
+       subtitle = "I wish I had one") +
+  scale_x_continuous(breaks = c(1990, 2010)) +
+  facet_wrap(~Gear) + 
+  my_theme + 
+  colors_I_use 
+
+  
+```
+```{r}
+
+ggplot(permits, aes(x=Value, y=StdDev, color=Gear)) +
+  geom_point() +
+  theme(legend.position = "bottom", 
+        legend.direction = "horizontal")
+```
+
+
+```{r}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
